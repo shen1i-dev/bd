@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Додавання товару - TechStore</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>TechStore</h1>
+        <h2>Додавання нового товару</h2>
+
+        <form method="POST" class="product-form">
+            <label>Назва товару:</label>
+            <input type="text" name="name" required>
+
+            <label>Бренд:</label>
+            <select name="brand_id" required>
+                {% for brand in brands %}
+                    <option value="{{ brand[0] }}">{{ brand[1] }}</option>
+                {% endfor %}
+            </select>
+
+            <label>Категорія:</label>
+            <select name="category_id" required>
+                {% for category in categories %}
+                    <option value="{{ category[0] }}">{{ category[1] }}</option>
+                {% endfor %}
+            </select>
+
+            <label>Ціна:</label>
+            <input type="number" name="price" min="0.01" step="0.01" required>
+
+            <label>Кількість:</label>
+            <input type="number" name="quantity" min="0" required>
+
+            <button type="submit" class="add-button">Зберегти товар</button>
+        </form>
+
+        <p style="margin-top: 20px;">
+            <a href="{{ url_for('index') }}">Повернутися до каталогу</a>
+        </p>
+    </div>
+</body>
+</html>
