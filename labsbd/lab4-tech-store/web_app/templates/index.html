@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TechStore - Магазин техніки</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <div class="container">
+
+        <h1>TechStore</h1>
+        <h2>Каталог товарів</h2>
+
+        <!-- Повідомлення про результат операції -->
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                    <p class="message">{{ message }}</p>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Кнопка додавання товару -->
+        <a class="add-button" href="{{ url_for('add_product') }}">
+            + Додати товар
+        </a>
+
+        <!-- Таблиця товарів -->
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Назва товару</th>
+                    <th>Бренд</th>
+                    <th>Категорія</th>
+                    <th>Ціна</th>
+                    <th>Кількість</th>
+                    <th>Дії</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for product in products %}
+                <tr>
+                    <td>{{ product[0] }}</td>
+                    <td>{{ product[1] }}</td>
+                    <td>{{ product[2] }}</td>
+                    <td>{{ product[3] }}</td>
+                    <td>{{ product[4] }} грн</td>
+                    <td>{{ product[5] }}</td>
+
+                    <td>
+                        <!-- Редагування товару -->
+                        <a href="{{ url_for('edit_product', product_id=product[0]) }}">
+                            Редагувати
+                        </a>
+
+                        <!-- Видалення товару -->
+                        <form action="{{ url_for('delete_product', product_id=product[0]) }}"
+                              method="POST">
+
+                            <button class="delete-button" type="submit">
+                                Видалити
+                            </button>
+
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+    </div>
+
+</body>
+</html>

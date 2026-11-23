@@ -1,0 +1,110 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: #f2f4f8;
+    color: #333;
+    padding: 30px;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+h1 {
+    color: #2457a7;
+    margin-bottom: 10px;
+}
+
+h2 {
+    margin-bottom: 25px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 25px;
+}
+
+th, td {
+    padding: 13px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+th {
+    background: #2457a7;
+    color: white;
+}
+
+tr:hover {
+    background: #f5f7fa;
+}
+
+.add-button {
+    display: inline-block;
+    padding: 11px 18px;
+    background: #2457a7;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+}
+
+.add-button:hover {
+    background: #17417f;
+}
+
+.delete-button {
+    padding: 8px 12px;
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.delete-button:hover {
+    background: #b52a37;
+}
+
+.message {
+    margin: 15px 0;
+    padding: 12px;
+    background: #e2f3e5;
+    color: #246b35;
+    border-radius: 6px;
+}
+
+.product-form {
+    max-width: 500px;
+    margin-top: 20px;
+}
+
+.product-form label {
+    display: block;
+    margin-top: 15px;
+    margin-bottom: 6px;
+    font-weight: bold;
+}
+
+.product-form input,
+.product-form select {
+    width: 100%;
+    padding: 11px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
+.product-form button {
+    margin-top: 20px;
+    cursor: pointer;
+}
