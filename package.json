@@ -1,0 +1,25 @@
+{
+  "name": "blog-app",
+  "version": "1.0.0",
+  "description": "",
+  "main": "categories.js",
+  "dependencies": {
+    "bson": "^7.3.4",
+    "express": "^5.3.0",
+    "memory-pager": "^1.5.0",
+    "mongodb": "^7.9.1",
+    "mongodb-connection-string-url": "^7.0.3",
+    "punycode": "^2.3.1",
+    "sparse-bitfield": "^3.0.3",
+    "tr46": "^6.0.0",
+    "webidl-conversions": "^8.0.1",
+    "whatwg-url": "^15.1.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs"
+}

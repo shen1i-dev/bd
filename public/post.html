@@ -1,0 +1,252 @@
+
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Публікація - Мій блог</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f3f4f6;
+            color: #222;
+            margin: 0;
+        }
+
+        header {
+            background: #252b38;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        main {
+            max-width: 850px;
+            margin: 30px auto;
+            padding: 25px;
+            background: white;
+            border-radius: 10px;
+        }
+
+        .meta {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .content {
+            line-height: 1.7;
+            white-space: pre-wrap;
+        }
+
+        .comment {
+            background: #f3f4f6;
+            padding: 15px;
+            margin: 12px 0;
+            border-radius: 7px;
+        }
+
+        button {
+            padding: 10px 15px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+        }
+
+        .rating {
+            margin-top: 25px;
+            margin-bottom: 25px;
+            padding: 20px;
+            background: #f3f4f6;
+            border-radius: 10px;
+        }
+
+        .rating button {
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        #ratingMessage {
+            color: #16a34a;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>Мій блог</h1>
+</header>
+
+<main>
+    <button onclick="location.href='/'">На головну</button>
+
+    <article id="post">
+        Завантаження публікації...
+    </article>
+
+    <!-- Оцінювання публікації -->
+    <div class="rating">
+        <h3>Оцініть публікацію</h3>
+
+        <button onclick="ratePost('like')">
+            👍 Лайк: <span id="likesCount">0</span>
+        </button>
+
+        <button onclick="ratePost('dislike')">
+            👎 Дизлайк: <span id="dislikesCount">0</span>
+        </button>
+
+        <p id="ratingMessage"></p>
+    </div>
+
+    <section>
+        <h2>Коментарі</h2>
+        <div id="comments"></div>
+    </section>
+</main>
+
+<script>
+
+// Отримання ID публікації
+function getPostId() {
+    return new URLSearchParams(location.search).get("id");
+}
+
+
+// Завантаження публікації та коментарів
+async function loadPost() {
+    const postContainer = document.getElementById("post");
+    const commentsContainer = document.getElementById("comments");
+
+    const postId = getPostId();
+
+    if (!postId) {
+        postContainer.textContent = "Не вказано ID публікації.";
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/posts/${postId}`);
+
+        if (!response.ok) {
+            throw new Error("Публікацію не знайдено");
+        }
+
+        const post = await response.json();
+
+        postContainer.innerHTML = "";
+
+        const title = document.createElement("h1");
+        title.textContent = post.title;
+
+        const author = document.createElement("p");
+        author.className = "meta";
+        author.textContent = "Автор: " + post.author.username;
+
+        const category = document.createElement("p");
+        category.className = "meta";
+        category.textContent = "Категорія: " + post.category.name;
+
+        const content = document.createElement("p");
+        content.className = "content";
+        content.textContent = post.content;
+
+        const stats = document.createElement("p");
+        stats.className = "meta";
+        stats.textContent =
+            `Перегляди: ${post.statistics.views} | ` +
+            `Вподобання: ${post.statistics.likes} | ` +
+            `Дизлайки: ${post.statistics.dislikes} | ` +
+            `Коментарі: ${post.statistics.comments_count}`;
+
+        postContainer.append(title, author, category, stats, content);
+
+        // Відображення коментарів
+        commentsContainer.innerHTML = "";
+
+        const approvedComments = (post.comments || [])
+            .filter(comment => comment.status === "approved");
+
+        if (approvedComments.length === 0) {
+            commentsContainer.textContent = "Коментарів поки немає.";
+        } else {
+            approvedComments.forEach(comment => {
+                const element = document.createElement("div");
+                element.className = "comment";
+
+                const username = document.createElement("strong");
+                username.textContent = comment.username;
+
+                const text = document.createElement("p");
+                text.textContent = comment.text;
+
+                element.append(username, text);
+                commentsContainer.appendChild(element);
+            });
+        }
+
+        // Оновлення лічильників оцінок
+        loadRatingStats(post);
+
+    } catch (error) {
+        postContainer.textContent = "Помилка завантаження публікації.";
+        console.error(error);
+    }
+}
+
+
+// Відображення кількості лайків і дизлайків
+function loadRatingStats(post) {
+    document.getElementById("likesCount").textContent =
+        post.statistics.likes;
+
+    document.getElementById("dislikesCount").textContent =
+        post.statistics.dislikes;
+}
+
+
+// Надсилання оцінки на сервер
+async function ratePost(type) {
+    const postId = getPostId();
+    const message = document.getElementById("ratingMessage");
+
+    try {
+        const response = await fetch(`/api/posts/${postId}/${type}`, {
+            method: "POST"
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            throw new Error(result.error || "Не вдалося зберегти оцінку");
+        }
+
+        document.getElementById("likesCount").textContent =
+            result.likes;
+
+        document.getElementById("dislikesCount").textContent =
+            result.dislikes;
+
+        message.textContent = result.message;
+
+    } catch (error) {
+        message.textContent = error.message;
+        console.error(error);
+    }
+}
+
+
+// Завантаження сторінки
+loadPost();
+
+</script>
+
+</body>
+</html>

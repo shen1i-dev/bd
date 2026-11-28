@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog System</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f3f4f6;
+            color: #222;
+        }
+
+        header {
+            background: #252b38;
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+
+        main {
+            max-width: 1100px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        #posts {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 20px;
+        }
+
+        .post {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px #00000015;
+        }
+
+        .post h2 {
+            margin-top: 0;
+            color: #2563eb;
+        }
+
+        .post button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            background: #2563eb;
+            color: white;
+            cursor: pointer;
+        }
+
+        .post button:hover {
+            background: #1d4ed8;
+        }
+
+        .meta {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .filter {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filter input {
+            flex: 1;
+            min-width: 250px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .filter button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            background: #2563eb;
+            color: white;
+            cursor: pointer;
+        }
+
+        .filter button:hover {
+            background: #1d4ed8;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>Мій блог</h1>
+    <p>Публікації про технології та програмування</p>
+</header>
+
+<main>
+    <h2>Останні публікації</h2>
+
+    <!-- Повнотекстовий пошук -->
+    <div class="filter">
+        <input
+            type="text"
+            id="searchInput"
+            placeholder="Введіть назву або текст публікації..."
+        >
+
+        <button onclick="searchPosts()">Пошук</button>
+        <button onclick="loadPosts()">Скинути</button>
+    </div>
+
+    <!-- Фільтр за тегами -->
+    <div class="filter">
+        <input
+            type="text"
+            id="tagInput"
+            placeholder="Введіть теги через кому, наприклад tag-1, topic-1"
+        >
+
+        <button onclick="filterPosts()">Знайти</button>
+        <button onclick="loadPosts()">Скинути фільтр</button>
+    </div>
+
+    <div id="posts">Завантаження публікацій...</div>
+</main>
+
+<script>
+
+// Відображення всіх публікацій
+async function loadPosts() {
+    const container = document.getElementById("posts");
+
+    try {
+        const response = await fetch("/api/posts");
+
+        if (!response.ok) {
+            throw new Error("Не вдалося отримати публікації");
+        }
+
+        const posts = await response.json();
+
+        displayPosts(posts);
+
+    } catch (error) {
+        container.textContent = "Помилка завантаження публікацій.";
+        console.error(error);
+    }
+}
+
+
+// Відображення карток публікацій
+function displayPosts(posts) {
+    const container = document.getElementById("posts");
+
+    container.innerHTML = "";
+
+    if (posts.length === 0) {
+        container.textContent = "Публікацій не знайдено.";
+        return;
+    }
+
+    posts.forEach(post => {
+        const card = document.createElement("article");
+        card.className = "post";
+
+        const title = document.createElement("h2");
+        title.textContent = post.title;
+
+        const excerpt = document.createElement("p");
+        excerpt.textContent = post.excerpt;
+
+        const author = document.createElement("p");
+        author.className = "meta";
+        author.textContent = "Автор: " + post.author.username;
+
+        const category = document.createElement("p");
+        category.className = "meta";
+        category.textContent = "Категорія: " + post.category.name;
+
+        const button = document.createElement("button");
+        button.textContent = "Читати далі";
+
+        button.addEventListener("click", () => {
+            window.location.href = `/post.html?id=${post._id}`;
+        });
+
+        card.append(title, excerpt, author, category, button);
+        container.appendChild(card);
+    });
+}
+
+
+// Пошук публікацій за тегами
+async function filterPosts() {
+    const input = document.getElementById("tagInput");
+    const tags = input.value.trim();
+
+    if (!tags) {
+        loadPosts();
+        return;
+    }
+
+    const container = document.getElementById("posts");
+
+    try {
+        const response = await fetch(
+            `/api/posts/tags?tags=${encodeURIComponent(tags)}`
+        );
+
+        if (!response.ok) {
+            throw new Error("Помилка пошуку за тегами");
+        }
+
+        const posts = await response.json();
+
+        displayPosts(posts);
+
+    } catch (error) {
+        container.textContent = "Помилка фільтрації публікацій.";
+        console.error(error);
+    }
+}
+
+
+// Повнотекстовий пошук публікацій
+async function searchPosts() {
+    const input = document.getElementById("searchInput");
+    const searchText = input.value.trim();
+
+    if (!searchText) {
+        loadPosts();
+        return;
+    }
+
+    const container = document.getElementById("posts");
+
+    try {
+        const response = await fetch(
+            `/api/posts/search?q=${encodeURIComponent(searchText)}`
+        );
+
+        if (!response.ok) {
+            throw new Error("Помилка пошуку");
+        }
+
+        const posts = await response.json();
+
+        displayPosts(posts);
+
+    } catch (error) {
+        container.textContent = "Помилка пошуку публікацій.";
+        console.error(error);
+    }
+}
+
+
+// Пошук натисканням клавіші Enter
+document.getElementById("searchInput").addEventListener("keydown", event => {
+    if (event.key === "Enter") {
+        searchPosts();
+    }
+});
+
+document.getElementById("tagInput").addEventListener("keydown", event => {
+    if (event.key === "Enter") {
+        filterPosts();
+    }
+});
+
+
+// Завантаження публікацій при відкритті сторінки
+loadPosts();
+
+</script>
+
+</body>
+</html>
